@@ -14,6 +14,7 @@ import (
 func main() {
 	c, err := client.NewStdioMCPClient(
 		"npx",
+		"",
 		[]string{}, // Empty ENV
 		"-y",
 		"@modelcontextprotocol/server-filesystem",

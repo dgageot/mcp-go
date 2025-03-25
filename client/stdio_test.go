@@ -34,7 +34,7 @@ func TestStdioMCPClient(t *testing.T) {
 	}
 	defer os.Remove(mockServerPath)
 
-	client, err := NewStdioMCPClient(mockServerPath, []string{})
+	client, err := NewStdioMCPClient(mockServerPath, "", []string{})
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

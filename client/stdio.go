@@ -93,7 +93,7 @@ func NewStdioMCPClient(
 func (c *StdioMCPClient) Close() error {
 	close(c.done)
 	c.cancel()
-	return c.cmd.Wait()
+	return nil
 }
 
 // OnNotification registers a handler function to be called when notifications are received.

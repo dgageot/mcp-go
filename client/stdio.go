@@ -31,6 +31,7 @@ type StdioMCPClient struct {
 	notifications []func(mcp.JSONRPCNotification)
 	notifyMu      sync.RWMutex
 	capabilities  mcp.ServerCapabilities
+	cancel        func()
 }
 
 // NewStdioMCPClient creates a new stdio-based MCP client that communicates with a subprocess.
@@ -42,7 +43,8 @@ func NewStdioMCPClient(
 	env []string,
 	args ...string,
 ) (*StdioMCPClient, error) {
-	cmd := exec.Command(command, args...)
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, command, args...)
 
 	mergedEnv := os.Environ()
 	mergedEnv = append(mergedEnv, env...)
@@ -52,11 +54,13 @@ func NewStdioMCPClient(
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
+		cancel()
 		return nil, fmt.Errorf("failed to create stdin pipe: %w", err)
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
+		cancel()
 		return nil, fmt.Errorf("failed to create stdout pipe: %w", err)
 	}
 
@@ -66,6 +70,7 @@ func NewStdioMCPClient(
 		stdout:    bufio.NewReader(stdout),
 		responses: make(map[int64]chan RPCResponse),
 		done:      make(chan struct{}),
+		cancel:    cancel,
 	}
 
 	if err := cmd.Start(); err != nil {
@@ -87,9 +92,7 @@ func NewStdioMCPClient(
 // Returns an error if there are issues closing stdin or waiting for the subprocess to terminate.
 func (c *StdioMCPClient) Close() error {
 	close(c.done)
-	if err := c.stdin.Close(); err != nil {
-		return fmt.Errorf("failed to close stdin: %w", err)
-	}
+	c.cancel()
 	return c.cmd.Wait()
 }
 

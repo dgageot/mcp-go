@@ -169,9 +169,9 @@ func (c *Stdio) readResponses() {
 		default:
 			line, err := c.stdout.ReadString('\n')
 			if err != nil {
-				if err != io.EOF {
-					fmt.Printf("Error reading response: %v\n", err)
-				}
+				// if err != io.EOF {
+				// 	fmt.Printf("Error reading response: %v\n", err)
+				// }
 				return
 			}
 

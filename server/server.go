@@ -379,6 +379,13 @@ func (s *MCPServer) RemoveResource(uri string) {
 	}
 }
 
+// RemoveAllResourceTemplates removes all resource templates from the server
+func (s *MCPServer) RemoveAllResourceTemplates() {
+	s.resourcesMu.Lock()
+	s.resourceTemplates = make(map[string]resourceTemplateEntry)
+	s.resourcesMu.Unlock()
+}
+
 // AddResourceTemplates registers multiple resource templates at once
 func (s *MCPServer) AddResourceTemplates(resourceTemplates ...ServerResourceTemplate) {
 	s.implicitlyRegisterResourceCapabilities()
